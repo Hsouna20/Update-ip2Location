@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  frontend:
+    build: ./client
+    container_name: update-client
+    ports:
+      - "87:87"
+    depends_on:
+      - backend
+    networks:
+      - update-network
+
+  backend:
+    build: ./api
+    container_name: update-back
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongo
+    networks:
+      - update-network
+
+  mongo:
+    image: mongo:4.4.6
+    container_name: mongoupdate
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data-update:/data/db
+    networks:
+      - update-network
+
+volumes:
+  mongo-data-update:
+    
+
+networks:
+   update-network:
+    driver: bridge
