@@ -9,7 +9,7 @@ services:
     depends_on:
       - backend
     networks:
-      - update-network
+      - iplocation-network
 
   backend:
     build: ./api
@@ -19,7 +19,7 @@ services:
     depends_on:
       - mongo
     networks:
-      - update-network
+      - iplocation-network
 
   mongo:
     image: mongo:4.4.6
@@ -29,12 +29,12 @@ services:
     volumes:
       - mongo-data-update:/data/db
     networks:
-      - update-network
+      - iplocation-network
 
 volumes:
   mongo-data-update:
     
 
 networks:
-   update-network:
+   iplocation-network:
     driver: bridge
