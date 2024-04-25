@@ -15,8 +15,14 @@ const Update = () => {
     const [longitude, setLongitude] = useState('');
     const [zipCode, setZipCode] = useState('');
     const [timeZone, setTimeZone] = useState('');
+    const [message, setMessage] = useState(''); 
+    const [loading, setLoading] = useState(false);
 
-    const handleSave = async () => {
+
+    const handleSave = async (e) => {
+        e.preventDefault();
+        setMessage(''); 
+        setLoading(true);
         try {
             await axios.post('http://localhost:3010/saveinfo', {
                 original_ip_from: originalIpFrom,
@@ -33,11 +39,21 @@ const Update = () => {
                 time_zone: timeZone
             });
             console.log('Data saved successfully');
+            setMessage('Data saved successfully');
         } catch (error) {
-            console.error(error);
+            if (error.response && error.response.status === 404) {
+                setMessage('Address not found');
+            } else {
+                setMessage('Error saving data');
+            }
+        } finally {
+            setLoading(false);
         }
     };
-    const handleDelete = async () => {
+    const handleDelete = async (e) => {
+        e.preventDefault();
+        setMessage(''); 
+        setLoading(true);
         try {
             await axios.delete('http://localhost:3010/deleteinfo', {
                 data: {
@@ -46,8 +62,15 @@ const Update = () => {
                 }
             });
             console.log('Data deleted successfully');
+            setMessage('Data deleted successfully');
         } catch (error) {
-            console.error(error);
+            if (error.response && error.response.status === 404) {
+                setMessage('Address not found');
+            } else {
+                setMessage('Error deleting data');
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -179,6 +202,13 @@ const Update = () => {
             >
                 Delete
             </Button>
+            {loading && <p>Loading...</p>}
+{message && (
+    <p className={message.includes('successfully') ? 'text-green-500' : 'text-red-500'}>
+        {message}
+    </p>
+)}
+
             </form>
         </div>
     );

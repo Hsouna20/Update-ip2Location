@@ -15,30 +15,17 @@ mongoose.connect("mongodb://127.0.0.1:27017/SearchInfo").then(
         console.log(err);
     });
 
-app.get('/getinfo', async (req, res) => {
-    const { original_ip_from, original_ip_to } = req.query;
-
-    try {
-        const location = await LocationModel.findOne({
-            ip_from: original_ip_from,
-            ip_to: original_ip_to
-        });
-
-        if (location) {
-            res.json({ result: location });
-        } else {
-            res.json({ result: 'No information found for this IP address range.' });
-        }
-    } catch (error) {
-        console.error('Error querying database:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
 
 app.post('/saveinfo', async (req, res) => {
     const { original_ip_from, original_ip_to, ip_from, ip_to, country_code, country_name, region_name, city_name, latitude, longitude, zip_code, time_zone } = req.body;
 
     try {
+        // Check if the specified IP range exists in the database
+        const existingAddress = await LocationModel.findOne({ ip_from: original_ip_from, ip_to: original_ip_to });
+        if (!existingAddress) {
+            return res.status(404).send('Address not found'); // IP range not found in the database
+        }
+
         // Build the update object with provided fields
         const updateFields = {};
         if (ip_from) updateFields.ip_from = ip_from;
@@ -56,6 +43,10 @@ app.post('/saveinfo', async (req, res) => {
         const filter = { ip_from: original_ip_from, ip_to: original_ip_to };
         const options = { upsert: true, new: true };
         const result = await LocationModel.findOneAndUpdate(filter, updateFields, options);
+        
+        if (!result) {
+            return res.status(404).send('Address not found'); // This should ideally not happen due to the earlier check
+        }
 
         res.status(200).send('Data saved successfully');
     } catch (error) {
@@ -68,6 +59,13 @@ app.delete('/deleteinfo', async (req, res) => {
     const { original_ip_from, original_ip_to } = req.body;
 
     try {
+        // Check if the specified IP range exists in the database
+        const existingAddress = await LocationModel.findOne({ ip_from: original_ip_from, ip_to: original_ip_to });
+        if (!existingAddress) {
+            return res.status(404).send('Address not found'); // IP range not found in the database
+        }
+
+        // If the address exists, proceed with deletion
         await LocationModel.deleteOne({
             ip_from: original_ip_from,
             ip_to: original_ip_to
