@@ -1,19 +1,13 @@
 
 FROM node:18-alpine
 WORKDIR /app
-
-
 COPY package*.json ./
-
-RUN npm install --production
-
-
-
+RUN npm install
+RUN npm install -g nodemon
 COPY . .
-RUN npm install  vite
-RUN npm run build
-EXPOSE 87
 
 
+EXPOSE 3010
 
-CMD ["npm", "run", "dev"]
+
+CMD ["npm", "start"]
