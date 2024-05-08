@@ -27,12 +27,12 @@ services:
     ports:
       - "27020:27017"
     volumes:
-      - mongo-data-update:/data/db
+      - mongo-data-iplocation:/data/db
     networks:
       - iplocation-network
 
 volumes:
-  mongo-data-update:
+  mongo-data-iplocation:
     
 
 networks:
